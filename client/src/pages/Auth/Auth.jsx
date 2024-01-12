@@ -4,6 +4,7 @@ import Logo from "../../img/logo.png";
 import { logIn, signUp } from "../../actions/AuthActions.js";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { Button } from "antd";
 
 const Auth = () => {
   const initialState = {
@@ -136,13 +137,9 @@ const Auth = () => {
                 ? "Already have an account Login"
                 : "Don't have an account Sign up"}
             </span>
-            <button
-              className="button infoButton"
-              type="Submit"
-              disabled={loading}
-            >
+            <Button type="primary" loading={loading} htmlType="submit">
               {loading ? "Loading..." : isSignUp ? "SignUp" : "Login"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

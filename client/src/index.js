@@ -6,13 +6,18 @@ import { PersistGate } from "redux-persist/integration/react";
 import store from "./store/ReduxStore";
 import App from "./App";
 
+import { ConfigProvider, theme } from 'antd';
+
 ReactDOM.render(
   <Provider store={store}>
+    <ConfigProvider theme={theme.darkAlgorithm}>
       <BrowserRouter>
         <Routes>
           <Route path="*" element={<App />} />
         </Routes>
       </BrowserRouter>
+    </ConfigProvider>
+
   </Provider>,
   document.getElementById("root")
 );

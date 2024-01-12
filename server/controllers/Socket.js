@@ -10,12 +10,14 @@ function initializeSocket(server) {
     io.on("connection", (socket) => {
         socket.on('join-room', (roomId, userId) => {
             socket.join(roomId);
-            console.log('join room:', roomId)
         });
 
-        socket.on("send-message", ({ roomId, userId, text, sender }) => {
-            io.to(roomId).emit("recieve-message", { roomId, userId, text, sender });
-            console.log(roomId, userId, sender)
+        socket.on("send-message", ({ roomId, userId, text, sender, senderId, image }) => {
+            io.to(roomId).emit("recieve-message", { roomId, userId, text, sender, senderId, image });
+        });
+
+        socket.on("update-room", () => {
+            io.emit("update-room");
         });
     })
 }

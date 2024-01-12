@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { getUser } from "../../api/UserRequests";
-const Conversation = ({ data, currentUser, online }) => {
-  const [userData, setUserData] = useState(null);
-  const dispatch = useDispatch();
+const Conversation = ({ data, currentUser, online, chat }) => {
+  const [userData, setUserData] = useState({});
+  // const dispatch = useDispatch();
 
   useEffect(() => {
     const userId = data.members.find((id) => id !== currentUser);
@@ -12,37 +11,93 @@ const Conversation = ({ data, currentUser, online }) => {
       try {
         const { data } = await getUser(userId);
         setUserData(data);
-        dispatch({ type: "SAVE_USER", data: data });
       } catch (error) {
         console.log(error);
       }
     };
 
-    // getUserData();
+    getUserData();
   }, []);
+
   return (
     <>
-      <div className="follower conversation">
-        <div>
-          <div className="online-dot"></div>
-          <img
-            src={data.image}
-            alt="Profile"
-            className="room image"
-            style={{
-              width: "50px",
-              height: "50px",
-              borderRadius: "100%",
-              objectFit: "cover",
-            }}
-          />
-          <div className="name" style={{ fontSize: "0.8rem" }}>
-            <span>{data.title}</span>
-            <span style={{ color: online ? "#51e200" : "" }}>Online</span>
-          </div>
-        </div>
+      <div className={`${chat && chat._id === data._id ? 'hoverDiv follower conversation' : 'follower conversation'}`}>
+        {data.type === "multiple" ? (
+          <>
+            <div>
+              <img
+                src={data.image}
+                alt="Profile"
+                className="room image"
+                style={{
+                  width: "50px",
+                  height: "50px",
+                  borderRadius: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              <div className="name" style={{ fontSize: "0.8rem" }}>
+                <span>{data.title}</span>
+                <span style={{ color: online ? "#51e200" : "" }}>
+                  {data.description}
+                </span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {data.isSearch ? (
+              <>
+                <div>
+                  <img
+                    src={data.profilePicture}
+                    alt="Profile"
+                    className="room image"
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div className="name" style={{ fontSize: "0.8rem" }}>
+                    <span>
+                      {data.firstname} {data.lastname}
+                    </span>
+                    <span style={{ color: online ? "#51e200" : "" }}>
+                      {data.worksAt || 'Thành niên cứng'}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <img
+                    src={userData.profilePicture}
+                    alt="Profile"
+                    className="room image"
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <div className="name" style={{ fontSize: "0.8rem" }}>
+                    <span>
+                      {userData.firstname} {userData.lastname}
+                    </span>
+                    <span style={{ color: online ? "#51e200" : "" }}>
+                      {userData.worksAt || 'Thành niên cứng'}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+          </>
+        )}
       </div>
-      <hr style={{ width: "85%", border: "0.1px solid #ececec" }} />
     </>
   );
 };

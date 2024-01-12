@@ -1,8 +1,7 @@
 .ChatBox-container {
-    background: var(--cardColor);
     border-radius: 1rem;
     display: grid;
-    grid-template-rows: 10vh 60vh 9vh;
+    grid-template-rows: 9vh 70vh 9vh;
 }
 
 .chat-header {
@@ -46,7 +45,6 @@
 
 
 .chat-sender {
-    background: white;
     display: flex;
     justify-content: space-between;
     height: 3.5rem;
@@ -68,7 +66,6 @@
 }
 .chat-sender>div:nth-of-type(1)
 {
-    background: rgb(233, 233, 233);
     border-radius: 0.5rem;
     display: flex;
     align-items: center;
@@ -78,5 +75,13 @@
 }
 .chat-sender>div{
     height: 70%;
-    padding: 0px 15px 0px 15px;
+}
+
+ .ant-table-wrapper .ant-table-cell, .ant-table-wrapper .ant-table-thead>tr>th, .ant-table-wrapper .ant-table-tbody>tr>th, .ant-table-wrapper .ant-table-tbody>tr>td, .ant-table-wrapper tfoot>tr>th, .ant-table-wrapper tfoot>tr>td {
+    padding: 6px 16px !important;
+}
+
+.chat-sender .ant-upload {
+    width: 100% !important;
+    height: 50px !important;
 }

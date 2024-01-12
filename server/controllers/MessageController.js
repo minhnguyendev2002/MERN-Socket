@@ -1,12 +1,13 @@
 import MessageModel from "../models/messageModel.js";
 
 export const addMessage = async (req, res) => {
-  const { roomId, senderId, text, sender } = req.body;
+  const { roomId, senderId, text, sender, image } = req.body;
   const message = new MessageModel({
     roomId,
     senderId,
     text,
     sender,
+    image
   });
   try {
     const result = await message.save();
@@ -38,6 +39,7 @@ export const getMessages = async (req, res) => {
           roomId: 1,
           senderId: 1,
           text: 1,
+          image: 1,
           sender: {
             firstname: 1,
             lastname: 1,

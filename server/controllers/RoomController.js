@@ -30,14 +30,14 @@ export const findRoom = async (req, res) => {
     try {
         const body = req.body;
         const queryString = {
-            members: { $in: [...body.members] },
+            members: { $all: body.members, $size: 2 },
             type: 'single'
         };
         const room = await RoomModel.findOne(queryString);
         if (room) {
-            res.status(200).json({ status: true })
+            res.status(200).json(room)
         } else {
-            res.status(200).json({ status: false })
+            res.status(200).json({})
         }
     } catch (error) {
         res.status(500).json(error)
@@ -66,7 +66,8 @@ export const createRoom = async (req, res) => {
 export const updateRoom = async (req, res) => {
     try {
         const body = req.body;
-        const room = await RoomModel.findOne(req.params.roomId);
+        const room = await RoomModel.findOne({_id: req.params.id});
+        console.log(room)
         if (room.type === 'multiple') {
             await room.update({
                 title: body.title,
@@ -74,7 +75,8 @@ export const updateRoom = async (req, res) => {
                 description: body.description,
                 members: body.members,
             });
-            res.status(200).json(room);
+            let result = await RoomModel.findOne({_id: req.params.id});
+            res.status(200).json(result);
         } else {
             res.status(500).json(error);
         }

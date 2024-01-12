@@ -5,7 +5,7 @@ const roomSchema = mongoose.Schema(
     members: {
         type: Array,
     },
-    title: {type: String, required : true},
+    title: String,
     image: String,
     type: {
         type: String,

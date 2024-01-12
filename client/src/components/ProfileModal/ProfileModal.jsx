@@ -1,65 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, useMantineTheme } from "@mantine/core";
 import "./ProfileModal.css";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { uploadImage } from "../../actions/UploadAction";
 import { updateUser } from "../../actions/UserAction";
+import * as UserApi from "../../api/UserRequests";
+import { Upload, Button, message } from "antd";
+import { storage } from "../../actions/UploadAction";
 
 const ProfileModal = ({ modalOpened, setModalOpened, data }) => {
   const theme = useMantineTheme();
   const { password, ...other } = data;
   const [formData, setFormData] = useState(other);
-  const [profileImage, setProfileImage] = useState(null);
-  const [coverImage, setCoverImage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const param = useParams();
 
   const { user } = useSelector((state) => state.authReducer.authData);
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const onImageChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      let img = event.target.files[0];
-      event.target.name === "profileImage"
-        ? setProfileImage(img)
-        : setCoverImage(img);
+  const upFirebase = async (_) => {
+    return new Promise((resolve, reject) => {
+      const uploadTask = storage.ref(`/${_.name}`).put(_);
+
+      uploadTask.on("state_changed", null, reject, async () => {
+        try {
+          const url = await storage.ref("").child(_.name).getDownloadURL();
+          resolve(url);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
+  };
+
+  const [messageApi] = message.useMessage();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      let result = null;
+      if (fileAvatar) {
+        const _avatar = await upFirebase(fileAvatar);
+        setFormData({ ...formData, profilePicture: _avatar });
+        result = await UserApi.updateUser(user._id, {
+          ...formData,
+          profilePicture: _avatar,
+        });
+      } else {
+        result = await UserApi.updateUser(user._id, { ...formData });
+      }
+      dispatch(updateUser(result.data));
+      messageApi.success("Update user thành công");
+      setModalOpened(false);
+    } catch (error) {
+      messageApi.error("Có lỗi xảy ra khi update user");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    let UserData = formData;
-    if (profileImage) {
-      const data = new FormData();
-      const fileName = Date.now() + profileImage.name;
-      data.append("name", fileName);
-      data.append("file", profileImage);
-      UserData.profilePicture = fileName;
-      try {
-        dispatch(uploadImage(data));
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    if (coverImage) {
-      const data = new FormData();
-      const fileName = Date.now() + coverImage.name;
-      data.append("name", fileName);
-      data.append("file", coverImage);
-      UserData.coverPicture = fileName;
-      try {
-        dispatch(uploadImage(data));
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    dispatch(updateUser(user._id, UserData));
-    setModalOpened(false);
+  const [avatar, setAvatar] = useState();
+  const [fileAvatar, setFileAvatar] = useState(null);
+
+  const handleUpload = (_) => {
+    setAvatar(URL.createObjectURL(_.file));
+    setFileAvatar(_.file);
   };
+
+  useEffect(() => {
+    setAvatar(user.profilePicture);
+  }, []);
 
   return (
     <Modal
@@ -72,6 +84,7 @@ const ProfileModal = ({ modalOpened, setModalOpened, data }) => {
       overlayBlur={3}
       size="55%"
       opened={modalOpened}
+      closeOnClickOutside={false}
       onClose={() => setModalOpened(false)}
     >
       <form className="infoForm" onSubmit={handleSubmit}>
@@ -105,47 +118,34 @@ const ProfileModal = ({ modalOpened, setModalOpened, data }) => {
             className="infoInput"
           />
         </div>
-
-        <div>
-          <input
-            value={formData.livesIn}
-            onChange={handleChange}
-            type="text"
-            placeholder="Lives in"
-            name="livesIn"
-            className="infoInput"
-          />
-          <input
-            value={formData.country}
-            onChange={handleChange}
-            type="text"
-            placeholder="Country"
-            name="country"
-            className="infoInput"
-          />
+        <div style={{ display: "flex" }}>
+          <Upload
+            listType="picture-card"
+            showUploadList={false}
+            onChange={handleUpload}
+            beforeUpload={() => false}
+          >
+            <div className="ant-upload-text">Upload</div>
+          </Upload>
+          {avatar && (
+            <img
+              style={{
+                width: "100px",
+                height: "100px",
+                borderRadius: "12px",
+                objectFit: "cover",
+              }}
+              src={avatar}
+              alt=""
+            />
+          )}
         </div>
 
-        <div>
-          <input
-            value={formData.relationship}
-            onChange={handleChange}
-            type="text"
-            className="infoInput"
-            placeholder="Relationship status"
-            name="relationship"
-          />
+        <div style={{ marginTop: "60px" }}>
+          <Button type="primary" htmlType="submit" loading={loading}>
+            Đồng ý
+          </Button>
         </div>
-
-        <div>
-          Profile image
-          <input type="file" name="profileImage" onChange={onImageChange} />
-          Cover image
-          <input type="file" name="coverImage" onChange={onImageChange} />
-        </div>
-
-        <button className="button infoButton" type="submit">
-          Update
-        </button>
       </form>
     </Modal>
   );
